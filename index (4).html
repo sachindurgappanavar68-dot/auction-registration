@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JBL Pro Season 2 Kabaddi Player Auction Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+    header { background: #007bff; color: white; text-align: center; padding: 20px; }
+    h1 { margin: 0; font-size: 24px; }
+    form { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #28a745; color: white; border: none; cursor: pointer; font-size: 16px; }
+    button:hover { background: #218838; }
+    table { width: 90%; margin: 20px auto; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; }
+    th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ccc; }
+    th { background: #007bff; color: white; }
+    #passwordSection { max-width: 400px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>JBL Pro Season 2 Kabaddi Player Auction Registration</h1>
+  </header>
+
+  <!-- Registration Form -->
+  <form id="registrationForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="number" id="age" placeholder="Age" required>
+    
+    <!-- Dropdown for Kabaddi Role/Position -->
+    <select id="role" required>
+      <option value="">Select Role/Position</option>
+      <option value="Raider">Raider</option>
+      <option value="Defender">Defender</option>
+      <option value="All-Rounder">All-Rounder</option>
+    </select>
+    
+    <input type="text" id="contact" placeholder="Contact Info" required>
+    <button type="submit">Register</button>
+  </form>
+
+  <!-- Password Section -->
+  <div id="passwordSection">
+    <input type="password" id="passwordInput" placeholder="Enter Password to View Registered Players">
+    <button id="passwordBtn">Submit</button>
+  </div>
+
+  <!-- Registered Players Table -->
+  <table id="playerTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Role/Position</th>
+        <th>Contact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Registered players will appear here -->
+    </tbody>
+  </table>
+
+  <!-- Firebase JS SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // 🔹 Replace with your Firebase project config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const form = document.getElementById('registrationForm');
+    const tableBody = document.getElementById('playerTable').querySelector('tbody');
+    const table = document.getElementById('playerTable');
+    const passwordSection = document.getElementById('passwordSection');
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordBtn = document.getElementById('passwordBtn');
+
+    // 🔐 Password for viewing players
+    const VIEW_PASSWORD = "jaimarutisportsclub";
+
+    // Listen for password submission
+    passwordBtn.addEventListener('click', () => {
+      if(passwordInput.value === VIEW_PASSWORD){
+        table.style.display = "table";
+        passwordSection.style.display = "none";
+      } else {
+        alert("Incorrect password!");
+      }
+    });
+
+    // Listen for all players in real-time
+    db.ref('players').on('value', snapshot => {
+      tableBody.innerHTML = '';
+      snapshot.forEach(child => {
+        const player = child.val();
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${player.name}</td>
+          <td>${player.age}</td>
+          <td>${player.role}</td>
+          <td>${player.contact}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    });
+
+    // Submit form
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const player = {
+        name: document.getElementById('name').value,
+        age: document.getElementById('age').value,
+        role: document.getElementById('role').value,
+        contact: document.getElementById('contact').value
+      };
+      db.ref('players').push(player);
+      form.reset();
+      alert('Player Registered Successfully!');
+    });
+  </script>
+
+</body>
+</html>
